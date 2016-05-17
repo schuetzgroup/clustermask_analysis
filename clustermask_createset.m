@@ -69,7 +69,7 @@ function varargout = clustermask_createset(varargin)
 
 % Edit the above text to modify the response to help clustermask_createset
 
-% Last Modified by GUIDE v2.5 12-Apr-2016 16:06:38
+% Last Modified by GUIDE v2.5 17-May-2016 13:15:03
 
 % XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 % Begin initialization code - DO NOT EDIT
@@ -134,10 +134,43 @@ guidata(hObject, handles);
 
 % --- Executes on button press in create_fig_checkbox.
 function create_fig_checkbox_Callback(hObject, eventdata, handles)
-if get(handles.create_fig_checkbox,'value')==0
-    set(handles.include_roi_checkbox,'value',0);
-    set(handles.save_png_checkbox,'value',0);
+switch get(handles.create_fig_checkbox,'value')
+    case 0
+        set(handles.include_roi_checkbox,'value',0);
+        set(handles.include_roi_checkbox,'enable','off');
+        set(handles.save_png_checkbox,'value',0);
+        set(handles.save_png_checkbox,'enable','off');
+    case 1
+        set(handles.include_roi_checkbox,'enable','on');
+        set(handles.save_png_checkbox,'enable','on');
 end
+
+% --- Executes on changes in gridsize_edit.
+function gridsize_edit_Callback(hObject, eventdata, handles)
+% get relevant parameters
+roi=str2double(get(handles.roi_edit,'string'));
+pixelsize=str2double(get(handles.pixelsize_edit,'string'));
+gridsize=str2double(get(handles.gridsize_edit,'string'));
+% calculate resulting pixelsize in binary masks
+set(handles.mask_pixel_edit,'string',num2str(roi*pixelsize/gridsize));
+
+% --- Executes on changes in pixelsize_edit.
+function pixelsize_edit_Callback(hObject, eventdata, handles)
+% get relevant parameters
+roi=str2double(get(handles.roi_edit,'string'));
+pixelsize=str2double(get(handles.pixelsize_edit,'string'));
+gridsize=str2double(get(handles.gridsize_edit,'string'));
+% calculate resulting pixelsize in binary masks
+set(handles.mask_pixel_edit,'string',num2str(roi*pixelsize/gridsize));
+
+% --- Executes on changes roi_edit.
+function roi_edit_Callback(hObject, eventdata, handles)
+% get relevant parameters
+roi=str2double(get(handles.roi_edit,'string'));
+pixelsize=str2double(get(handles.pixelsize_edit,'string'));
+gridsize=str2double(get(handles.gridsize_edit,'string'));
+% calculate resulting pixelsize in binary masks
+set(handles.mask_pixel_edit,'string',num2str(roi*pixelsize/gridsize));
 
 % --- Executes on button press in process_button.
 function process_button_Callback(hObject, eventdata, handles)
@@ -266,7 +299,7 @@ for f=1:length(handles.files)
             % in nm²
             ON_nm2=ON*((handles.roi/handles.gridsize)*handles.pixelsize)^2;
             
-            % copy data to output matrix files
+            % copy data to output matrix
             result.files(f,1)=cellstr(filename);
             result.cell_area(f)=info.cellarea_nm2;
             result.clust_area(f,t)=ON_nm2;
@@ -275,16 +308,21 @@ for f=1:length(handles.files)
             result.num_locs_legend(2,(t*2))=cellstr('ON_LOCS');
             result.num_locs_legend(2,(t*2)-1)=cellstr('OFF_LOCS');
         end
+        
         % save collected data
         save(fullfile(handles.path,'result.mat'),'result');
     end
 end
 
+% plot and fit analyzed data
+result=clustermask_plot_and_fit(handles,result);
+
+% save collected data
+save(fullfile(handles.path,'result.mat'),'result');
+
 % hide "BUSY" sign
 set(handles.busy_txt,'visible','off');
 pause(0.001);
-
-
 
 %%% ------------------------------------------------------------------ %%%
 %%%    EMPTY CALLBACK FUNCTIONS:                                       %%%
@@ -313,8 +351,6 @@ function sig_edit_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-function gridsize_edit_Callback(hObject, eventdata, handles)
 
 % --- Executes during object creation, after setting all properties.
 function gridsize_edit_CreateFcn(hObject, eventdata, handles)
@@ -376,15 +412,11 @@ end
 % --- Executes on button press in same_roi_checkbox.
 function same_roi_checkbox_Callback(hObject, eventdata, handles)
 
-function roi_edit_Callback(hObject, eventdata, handles)
-
 % --- Executes during object creation, after setting all properties.
 function roi_edit_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-function pixelsize_edit_Callback(hObject, eventdata, handles)
 
 % --- Executes during object creation, after setting all properties.
 function pixelsize_edit_CreateFcn(hObject, eventdata, handles)
@@ -393,3 +425,33 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 function save_png_checkbox_Callback(hObject, eventdata, handles)
+
+% --- Executes on button press in ref_curve_checkbox.
+function ref_curve_checkbox_Callback(hObject, eventdata, handles)
+
+% --- Executes on button press in plot_checkbox.
+function plot_checkbox_Callback(hObject, eventdata, handles)
+
+function a_edit_Callback(hObject, eventdata, handles)
+
+% --- Executes during object creation, after setting all properties.
+function a_edit_CreateFcn(hObject, eventdata, handles)
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+function b_edit_Callback(hObject, eventdata, handles)
+
+% --- Executes during object creation, after setting all properties.
+function b_edit_CreateFcn(hObject, eventdata, handles)
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+% --- Executes during object creation, after setting all properties.
+function mask_pixel_edit_CreateFcn(hObject, eventdata, handles)
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+function mask_pixel_edit_Callback(hObject, eventdata, handles)
